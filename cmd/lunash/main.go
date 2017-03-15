@@ -12,11 +12,13 @@ import (
 )
 
 var (
+	loginArg = flag.Bool("login", false, "run `hsm login` before the commands")
 	cmdArg   = flag.String("command", "", "a semicolon delimited list of commands to run")
 	namesArg = flag.String("names", "", "comma separated list of HSMs to send command to")
 	allArg   = flag.Bool("all", false, "send commands to all HSMs in the config file")
 	confArg  = flag.String("config", "./lunash.json", "path to the config file")
 
+	login    bool
 	confPath string
 	all      bool
 	names    []string
@@ -30,6 +32,10 @@ func parseFlags() {
 	}
 
 	flag.Parse()
+
+	if loginArg != nil && *loginArg {
+		login = true
+	}
 
 	if allArg != nil && *allArg {
 		all = true
@@ -83,7 +89,7 @@ func main() {
 			log.Fatalf("host=%s error='%s'", config.Hostname, err.Error())
 		}
 
-		outputs, err := client.Run(commands)
+		outputs, err := client.Run(commands, login)
 		for i := range outputs {
 			log.Printf("host=%s cmd=%s\n%s\n",
 				config.Hostname,

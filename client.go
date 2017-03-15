@@ -27,7 +27,7 @@ func (c *Client) Connect() (err error) {
 }
 
 // Run runs multiple commands in an SSH PTY session and returns their outputs.
-func (c *Client) Run(commands []string) ([]string, error) {
+func (c *Client) Run(commands []string, login bool) ([]string, error) {
 	var runErr, ptyErr error
 	outputs := make([]string, 0, len(commands))
 
@@ -35,6 +35,20 @@ func (c *Client) Run(commands []string) ([]string, error) {
 		if _, err := readUntilPrompt(stdout); err != nil {
 			runErr = errors.Wrap(err, "Error reading shell banner")
 			return
+		}
+
+		if login {
+			_, err := stdin.Write([]byte(fmt.Sprintf("hsm login -p %s\n", c.config.Password)))
+			if err != nil {
+				runErr = errors.Wrap(err, "Error running 'hsm login'")
+				return
+			}
+
+			_, err = readUntilPrompt(stdout)
+			if err != nil {
+				runErr = errors.New("Error reading command output for 'hsm login'")
+				return
+			}
 		}
 
 		for _, cmd := range commands {
@@ -54,7 +68,7 @@ func (c *Client) Run(commands []string) ([]string, error) {
 
 			output, err := readUntilPrompt(stdout)
 			if err != nil {
-				runErr = fmt.Errorf("Error reading command output '%s'", cmd)
+				runErr = fmt.Errorf("Error reading command output for '%s'", cmd)
 				return
 			}
 
