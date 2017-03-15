@@ -1,0 +1,16 @@
+[{
+  "nickname": "hsm1",
+  "hostname": "1.1.1.1",
+  "ssh_port": 22,
+  "ssh_login": "admin",
+  "ssh_password": "password",
+  "ssh_fingerprint": "SHA256:40QvIN7FAGgYxl+5UVoTskPK1zKswZcDzPCK6aZReuU",
+  "hsm_password": "other_password"
+},{
+  "hostname": "2.2.2.2",
+  "ssh_port": 2222,
+  "ssh_login": "somebody",
+  "ssh_password": "s3cret",
+  "ssh_fingerprint": "SHA256:yv0u4ILh4aYY1GHGQpXu025WbZgUpJ0FBhjw18SgZPE",
+  "hsm_password": "other_s3cret"
+}]
