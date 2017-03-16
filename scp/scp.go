@@ -22,28 +22,19 @@ func GetFile(session *ssh.Session, path string) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting file with SCP")
 	}
-
-	output := make(chan []byte)
-	gerr := make(chan error)
-
-	go getFile(stdin, stdout, output, gerr)
+	defer stdin.Close()
 
 	cmd := "scp -f " + path
 	debugf("Running command: '%s'\n", cmd)
-	if err = session.Run(cmd); err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("Error running command '%s'", cmd))
+	if err = session.Start(cmd); err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("Error starting command '%s'", cmd))
 	}
-	debug("Done")
+	defer session.Wait()
 
-	select {
-	case o := <-output:
-		return o, nil
-	case err := <-gerr:
-		return nil, err
-	}
+	return getFile(stdin, stdout)
 }
 
-func getFile(stdin io.WriteCloser, stdout io.Reader, output chan []byte, gerr chan error) {
+func getFile(stdin io.WriteCloser, stdout io.Reader) ([]byte, error) {
 	debug("Writing null byte")
 	stdin.Write([]byte{0x00})
 
@@ -51,8 +42,7 @@ func getFile(stdin io.WriteCloser, stdout io.Reader, output chan []byte, gerr ch
 	meta := make([]byte, 1024)
 	n, err := stdout.Read(meta)
 	if err != nil {
-		gerr <- errors.Wrap(err, "Error reading from stdin")
-		return
+		return nil, errors.Wrap(err, "Error reading from stdin")
 	}
 	debugf("Got metadata: '%s'", strconv.QuoteToASCII(string(meta[:n])))
 
@@ -62,14 +52,12 @@ func getFile(stdin io.WriteCloser, stdout io.Reader, output chan []byte, gerr ch
 	//   mode| size| path
 	mparts := strings.SplitN(string(meta[:n]), " ", 3)
 	if mparts == nil || len(mparts) != 3 {
-		gerr <- errors.New("Bad metadata from SCP")
-		return
+		return nil, errors.New("Bad metadata from SCP")
 	}
 
 	flen, err := strconv.ParseInt(mparts[1], 10, 64)
 	if err != nil {
-		gerr <- errors.Wrap(err, "Error parsing SCP metadata")
-		return
+		return nil, errors.Wrap(err, "Error parsing SCP metadata")
 	}
 
 	debug("Writing null byte")
@@ -79,19 +67,17 @@ func getFile(stdin io.WriteCloser, stdout io.Reader, output chan []byte, gerr ch
 	file := make([]byte, flen)
 	n, err = stdout.Read(file)
 	if err != nil {
-		gerr <- errors.Wrap(err, "Error reading from stdin")
-		return
+		return nil, errors.Wrap(err, "Error reading from stdin")
 	}
 	if n != int(flen) {
-		gerr <- errors.New("Read incomplete file")
-		return
+		return nil, errors.New("Read incomplete file")
 	}
 	debug("File: ", string(file))
 
-	debug("Closing stdin")
-	stdin.Close()
+	debug("Writing null byte")
+	stdin.Write([]byte{0x00})
 
-	output <- file
+	return file, nil
 }
 
 func openPipes(session *ssh.Session) (stdin io.WriteCloser, stdout io.Reader, err error) {

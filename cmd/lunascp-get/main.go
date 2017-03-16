@@ -18,6 +18,10 @@ var (
 	confPath string
 )
 
+// func init() {
+// 	scp.Debug = true
+// }
+
 func parseFlags() {
 	flag.Parse()
 
