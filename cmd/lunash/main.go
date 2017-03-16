@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -26,11 +25,6 @@ var (
 )
 
 func parseFlags() {
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage of %s:\n\n%s [args] [-- command]\n\nArgs:\n\n", os.Args[0], os.Args[0])
-		flag.PrintDefaults()
-	}
-
 	flag.Parse()
 
 	if loginArg != nil && *loginArg {
