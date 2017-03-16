@@ -2,11 +2,11 @@
 set -e
 cd "$(dirname "$0")/.."
 
-mkdir -p bin
+. script/_env
 
-(
-  cd bin
-  go build github.com/mastahyeti/lunash/cmd/lunash
-  go build github.com/mastahyeti/lunash/cmd/lunascp-get
-  go build github.com/mastahyeti/lunash/cmd/lunascp-put
-)
+BIN_DIR=${BIN_DIR:-$LUNASH_ROOT/bin}
+mkdir -p $BIN_DIR
+
+go build -o $BIN_DIR/lunash github.com/mastahyeti/lunash/cmd/lunash
+go build -o $BIN_DIR/lunascp-get $build_opts github.com/mastahyeti/lunash/cmd/lunascp-get
+go build -o $BIN_DIR/lunascp-put $build_opts github.com/mastahyeti/lunash/cmd/lunascp-put

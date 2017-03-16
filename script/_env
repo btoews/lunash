@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Repo directory
+LUNASH_ROOT=$(cd "$(dirname "$0")/.." && pwd)
+
+# Setup fake GOPATH and link this repo it.
+export GOPATH="$LUNASH_ROOT/.setup/gopath"
+MASTAHYETI_PATH="$GOPATH/src/github.com/mastahyeti"
+mkdir -p $MASTAHYETI_PATH
+if [ ! -h $MASTAHYETI_PATH/lunash ]; then
+  ln -sf "$LUNASH_ROOT" "$MASTAHYETI_PATH/lunash"
+fi
