@@ -8,4 +8,5 @@ mkdir -p bin
   cd bin
   go build github.com/mastahyeti/lunash/cmd/lunash
   go build github.com/mastahyeti/lunash/cmd/lunascp-get
+  go build github.com/mastahyeti/lunash/cmd/lunascp-put
 )

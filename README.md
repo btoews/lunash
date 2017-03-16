@@ -34,5 +34,17 @@ The `lunascp-get` command SCP's a file from the HSM, outputting it to stdout.
 Get `server.pem` from the HSM with nickname `hsm1`:
 
 ```bash
-bin/lunascp-get -name hsm1 -path server.pem
+bin/lunascp-get -name hsm1 -path server.pem > server.pem
+```
+
+### `lunascp-put`
+
+The `lunascp-put` command SCP's a file from stdin to the HSM.
+
+#### Examples:
+
+Put `client.pem` on the HSM with nickname `hsm1`:
+
+```bash
+bin/lunascp-put -name hsm1 -path client.pem < client.pem
 ```

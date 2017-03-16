@@ -46,6 +46,24 @@ func (c *Client) ScpGet(path string) ([]byte, error) {
 	return file, nil
 }
 
+// ScpPut writes a file onto the HSM.
+func (c *Client) ScpPut(path string, file []byte) error {
+	var scpErr, sesErr error
+
+	sesErr = c.WithSession(func(session *ssh.Session) {
+		scpErr = scp.PutFile(session, path, file)
+	})
+
+	if scpErr != nil {
+		return scpErr
+	}
+	if sesErr != nil {
+		return sesErr
+	}
+
+	return nil
+}
+
 // Run runs multiple commands in an SSH PTY session and returns their outputs.
 func (c *Client) Run(commands []string, login bool) ([]string, error) {
 	var runErr, ptyErr error
@@ -166,8 +184,11 @@ func (c *Client) WithSession(cb func(*ssh.Session)) error {
 
 	cb(session)
 
-	err = session.Close()
-	if err != nil && err != io.EOF {
+	if err = session.Wait(); err != nil {
+		return errors.Wrap(err, "Error waiting for session")
+	}
+
+	if err = session.Close(); err != nil && err != io.EOF {
 		return errors.Wrap(err, "Error closing session")
 	}
 
