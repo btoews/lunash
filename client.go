@@ -5,6 +5,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/mastahyeti/lunash/scp"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
 )
@@ -24,6 +25,25 @@ func newClient(config *Config) *Client {
 func (c *Client) Connect() (err error) {
 	c.client, err = c.config.sshClient()
 	return
+}
+
+// ScpGet gets the file at the given path from the HSM.
+func (c *Client) ScpGet(path string) ([]byte, error) {
+	var scpErr, sesErr error
+	var file []byte
+
+	sesErr = c.WithSession(func(session *ssh.Session) {
+		file, scpErr = scp.GetFile(session, path)
+	})
+
+	if scpErr != nil {
+		return nil, scpErr
+	}
+	if sesErr != nil {
+		return nil, sesErr
+	}
+
+	return file, nil
 }
 
 // Run runs multiple commands in an SSH PTY session and returns their outputs.
@@ -115,6 +135,7 @@ func (c *Client) WithPTY(cb func(io.WriteCloser, io.Reader)) error {
 			ptyErr = errors.Wrap(err, "Error getting stdin pipe")
 			return
 		}
+		defer stdin.Close()
 
 		stdout, err := session.StdoutPipe()
 		if err != nil {
@@ -146,7 +167,7 @@ func (c *Client) WithSession(cb func(*ssh.Session)) error {
 	cb(session)
 
 	err = session.Close()
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return errors.Wrap(err, "Error closing session")
 	}
 

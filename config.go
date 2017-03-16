@@ -65,6 +65,20 @@ func LoadConfigs(path string, names []string) ([]*Config, error) {
 	return configs, nil
 }
 
+// LoadConfig loads the config for the HSM with the given nickname or hostname.
+func LoadConfig(path string, name string) (*Config, error) {
+	cfgs, err := LoadConfigs(path, []string{name})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(cfgs) != 1 {
+		return nil, fmt.Errorf("No config with name %s", name)
+	}
+
+	return cfgs[0], nil
+}
+
 // Client returns a Client from this config.
 func (cfg *Config) Client() *Client {
 	return newClient(cfg)
