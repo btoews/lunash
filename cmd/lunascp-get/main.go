@@ -6,21 +6,19 @@ import (
 	"os"
 
 	"github.com/mastahyeti/lunash"
+	"github.com/mastahyeti/lunash/scp"
 )
 
 var (
-	pathArg = flag.String("path", "", "path of file to get from HSM")
-	nameArg = flag.String("name", "", "name of HSM to get file from")
-	confArg = flag.String("config", "./lunash.json", "path to the config file")
+	pathArg  = flag.String("path", "", "path of file to get from HSM")
+	nameArg  = flag.String("name", "", "name of HSM to get file from")
+	confArg  = flag.String("config", "./lunash.json", "path to the config file")
+	debugArg = flag.Bool("debug", false, "whether to output debugging information")
 
 	path     string
 	name     string
 	confPath string
 )
-
-// func init() {
-// 	scp.Debug = true
-// }
 
 func parseFlags() {
 	flag.Parse()
@@ -44,6 +42,10 @@ func parseFlags() {
 	} else {
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	if debugArg != nil && *debugArg {
+		scp.Debug = true
 	}
 }
 

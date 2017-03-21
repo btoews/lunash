@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/mastahyeti/lunash"
+	"github.com/mastahyeti/lunash/scp"
 )
 
 var (
@@ -16,6 +17,7 @@ var (
 	namesArg = flag.String("names", "", "comma separated list of HSMs to send command to")
 	allArg   = flag.Bool("all", false, "send commands to all HSMs in the config file")
 	confArg  = flag.String("config", "./lunash.json", "path to the config file")
+	debugArg = flag.Bool("debug", false, "whether to output debugging information")
 
 	login    bool
 	confPath string
@@ -59,6 +61,10 @@ func parseFlags() {
 	} else {
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	if debugArg != nil && *debugArg {
+		scp.Debug = true
 	}
 }
 

@@ -8,13 +8,15 @@ import (
 	"os"
 
 	"github.com/mastahyeti/lunash"
+	"github.com/mastahyeti/lunash/scp"
 	"github.com/pkg/errors"
 )
 
 var (
-	pathArg = flag.String("path", "", "where to put the file on the HSM")
-	nameArg = flag.String("name", "", "name of HSM to put file on")
-	confArg = flag.String("config", "./lunash.json", "path to the config file")
+	pathArg  = flag.String("path", "", "where to put the file on the HSM")
+	nameArg  = flag.String("name", "", "name of HSM to put file on")
+	confArg  = flag.String("config", "./lunash.json", "path to the config file")
+	debugArg = flag.Bool("debug", false, "whether to output debugging information")
 
 	path     string
 	name     string
@@ -43,6 +45,10 @@ func parseFlags() {
 	} else {
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	if debugArg != nil && *debugArg {
+		scp.Debug = true
 	}
 }
 
