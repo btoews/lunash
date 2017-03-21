@@ -122,6 +122,12 @@ func (c *Client) Run(commands []string, login bool) ([]string, error) {
 
 			outputs = append(outputs, output)
 		}
+
+		_, err := stdin.Write([]byte("exit\n"))
+		if err != nil {
+			runErr = errors.Wrap(err, "Error running 'exit'")
+			return
+		}
 	})
 
 	if runErr != nil {

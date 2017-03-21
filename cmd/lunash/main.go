@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	loginArg = flag.Bool("login", false, "run `hsm login` before the commands")
+	loginArg = flag.Bool("login", false, "run 'hsm login' before the commands")
 	cmdArg   = flag.String("command", "", "a semicolon delimited list of commands to run")
 	namesArg = flag.String("names", "", "comma separated list of HSMs to send command to")
 	allArg   = flag.Bool("all", false, "send commands to all HSMs in the config file")
